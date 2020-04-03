@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Thale merge lhw and high frequency data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mhm_5.5_R_2019</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Thale merge lhw and high frequency data</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-04-03
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>mhm_5.5_R_2019/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.1). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200317code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200317)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200317code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200317)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongea6d280"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> ea6d280 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongea6d280" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version ea6d280. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/thale_lhw_hf.nb.html
+
+Untracked files:
+    Untracked:  Hydro_wq_579610.jpeg
+    Untracked:  USGS_statistic.pdf
+    Untracked:  analysis/EDA.Rmd
+    Untracked:  analysis/Rain_runoff_paper_plot.R
+    Untracked:  analysis/cali_vali_results.R
+    Untracked:  analysis/lhw_pdf.R
+    Untracked:  analysis/perfermance_table.Rmd
+    Untracked:  analysis/pointsource_2019.R
+    Untracked:  analysis/raster_trend_analysis.R
+    Untracked:  analysis/selke_w.Rmd
+    Untracked:  analysis/spatial_anlysis.R
+    Untracked:  analysis/station_timeseries_trend.R
+    Untracked:  analysis/thale_hf.R
+    Untracked:  data/ConfigFile_cali2018.log
+    Untracked:  data/ConfigFile_vali2018.log
+    Untracked:  data/Load_mon_baseline_tickoff_thale.rds
+    Untracked:  data/Pre_cali_stations_2004_2018.csv
+    Untracked:  data/Q_2004_2018.csv
+    Untracked:  data/Rapbode_smoothdata.csv
+    Untracked:  data/Rappbode-_TOR_-_YBT_Thale_-YBT_Thale-433.csv
+    Untracked:  data/Temp_cali_stations_2004_2018.csv
+    Untracked:  data/WQM_Fluxes_States_cali2018.nc
+    Untracked:  data/WQM_Fluxes_States_vali2018.nc
+    Untracked:  data/conc_vali_cali.csv
+    Untracked:  data/daily_concentration_cali.out
+    Untracked:  data/daily_concentration_cali2018.out
+    Untracked:  data/daily_concentration_vali2018.out
+    Untracked:  data/daily_discharge_cali.out
+    Untracked:  data/daily_discharge_cali2018.out
+    Untracked:  data/daily_discharge_vali2018.out
+    Untracked:  data/discharge_cali.nc
+    Untracked:  data/discharge_cali2018.nc
+    Untracked:  data/discharge_vali2018.nc
+    Untracked:  data/fort.123
+    Untracked:  data/fort_cali.123
+    Untracked:  data/i, nLink_riverbox(i), nLink_criverbox(i,1), nNode_interload(iNode,1),nNode_LoadqTIN(iNode,1),temp_qTIN(iNode), width, nLink_length(i).txt
+    Untracked:  data/i, nLink_riverbox(i), nLink_criverboxi, nNode_interload(iNode,nNode_LoadqTIN(iNode,temp_qTIN(iNode), width, nLink_length(i).txt
+    Untracked:  data/i,nLink_riverbox(i),nNode_VTR(iNode), nLink_criverbox(i,1),aquatic_denitri(i),aquatic_assimil(i).txt
+    Untracked:  data/i,nLink_riverbox(i),nNode_VTR(iNode), nLink_criverboxi,,aquatic_denitri(i),aquatic_assimil(i).txt
+    Untracked:  data/kk,cellCoor11(kk,1),cellCoor11(kk,2),Id11(ic,jc),fDir11(ic, jc).txt
+    Untracked:  data/mHM_Fluxes_States_cali2018.nc
+    Untracked:  data/pet_cali_stations_2004_2018.csv
+    Untracked:  data/rivernetwork.xlsx
+    Untracked:  data/thale_daily_df.csv
+    Untracked:  data/thale_upstream.xls
+    Untracked:  data/width_cali.txt
+    Untracked:  wq_579020_2007_2018.txt
+    Untracked:  wq_579020_2007_2019.txt
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/thale_lhw_hf.Rmd</code>) and HTML (<code>docs/thale_lhw_hf.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+ea6d280
+</td>
+<td>
+zhouxi
+</td>
+<td>
+2020-04-03
+</td>
+<td>
+Publish the analysis files for myproject mhm_5.5_R_2019
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a> Notebook. When you execute code within the notebook, the results appear beneath the code.</p>
+<p>Try executing this chunk by clicking the <em>Run</em> button within the chunk or by placing your cursor inside it and pressing <em>Ctrl+Shift+Enter</em>.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>-- Attaching packages --------------------------------------------------- tidyverse 1.3.0 --</code></pre>
+<pre><code>v ggplot2 3.3.0     v purrr   0.3.3
+v tibble  2.1.3     v dplyr   0.8.5
+v tidyr   1.0.2     v stringr 1.4.0
+v readr   1.3.1     v forcats 0.5.0</code></pre>
+<pre><code>-- Conflicts ------------------------------------------------------ tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(lubridate)</code></pre>
+<pre><code>
+Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:base&#39;:
+
+    date</code></pre>
+<pre class="r"><code>library(zoo)</code></pre>
+<pre><code>
+Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code># read thale station from LHW 2007-2017
+path &lt;- &#39;D:/BODE_data/Water quality data/LHW/410105/Chemie_LIMS_FG_Wasser_20200320_153427.csv &#39;
+
+No3&lt;- read_csv2(path)</code></pre>
+<pre><code>Using &#39;,&#39; as decimal and &#39;.&#39; as grouping mark. Use read_delim() for more control.</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  Messstellenname = col_character(),
+  Gewässer = col_character(),
+  `Messstellen-Nr` = col_double(),
+  Datum = col_character(),
+  Zeit = col_time(format = &quot;&quot;),
+  Wert = col_double(),
+  Einheit = col_character(),
+  Parameter = col_character()
+)</code></pre>
+<pre class="r"><code>No3$Datum &lt;- dmy(No3$Datum)
+
+No3 &lt;- No3 %&gt;% dplyr:: select(Datum,Wert) %&gt;% rename(Date=Datum,Value=Wert )
+
+# extract thale station 2018 dataset
+# link2018 &lt;- &#39;https://lhw.sachsen-anhalt.de/fileadmin/Bibliothek/Politik_und_Verwaltung/Landesbetriebe/LHW/neu_PDF/5.0_GLD/Gew_Daten_2018/SAL17_Wasser_EP_2018.pdf&#39;
+
+# out_2018 &lt;- extract_tables(link2018,pages=c(9),output = &#39;csv&#39;,outdir = &#39;./data&#39;)
+# View(out)
+
+thale_2015_2018 &lt;- readxl::read_excel(&#39;D:/BODE_data/Water quality data/LHW/Thale_wq_2015_2018.xlsx&#39;)  
+
+thale_2018 &lt;- thale_2015_2018 %&gt;% mutate(Date= as.Date(Date,format=&#39;%d.%m.%Y&#39;), Value= as.numeric( gsub(&quot;,&quot;,&quot;&quot;,Value) )/100 ) %&gt;% filter( between(Date,as.Date(&#39;2018-01-01&#39;),as.Date(&#39;2018-12-31&#39;)) )
+
+# combine LHW
+
+No3 &lt;- rbind(No3,thale_2018)
+
+#creat new time series
+t_tofill&lt;- seq(as.Date(&quot;2007-01-01&quot;), as.Date(&quot;2018-12-31&quot;), by=&quot;day&quot;)
+#convert time series to datafame with the same colname &#39;Datum&#39;
+t&lt;-data.frame(list(Date=t_tofill))
+
+#merge two time series by colname
+
+No3_df&lt;- merge(t, data.frame(No3),by=&#39;Date&#39;,all.x=T)
+
+# Missing Value Imputation By Interpolation for thale station
+
+x &lt;- zoo(No3_df$Value,No3_df$Date)
+x &lt;- na.spline(x)
+plot(x)</code></pre>
+<p><img src="figure/thale_lhw_hf.Rmd/thale-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>View(x)
+# high frequency data in 2011-06-18 to 2014-11-17
+thale_hf &lt;- read_csv(&#39;./data/thale_daily_df.csv&#39;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  Date = col_date(format = &quot;&quot;),
+  No3 = col_double()
+)</code></pre>
+<pre class="r"><code>y &lt;- zoo(thale_hf$No3,thale_hf$Date)
+
+plot.zoo(cbind(x, y),plot.type = &quot;single&quot;, col = c(&quot;red&quot;, &quot;blue&quot;))</code></pre>
+<p><img src="figure/thale_lhw_hf.Rmd/thale-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># merge LHW dateset  with high frequncy data
+
+dt &lt;- index(y)
+
+z&lt;- x[! index(x) %in%   dt]
+plot(z)</code></pre>
+<p><img src="figure/thale_lhw_hf.Rmd/thale-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>zy &lt;-  rbind(z,y)
+plot(zy)</code></pre>
+<p><img src="figure/thale_lhw_hf.Rmd/thale-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># add lines to a text file
+lines&lt;- &#39;nodata -9999
+n   1   measurements    per day [1, 1440]
+start   2000    1   1   0   0   (YYYY   MM  DD  HH  MM)
+end 2018    12  31  0   0   (YYYY   MM  DD  HH  MM)
+YYYY    MM  DD  HH  NN  IN&#39;
+write(lines,&quot;wq_579020_2007_2018.txt&quot;)
+
+# create new time series
+df&lt;- data.frame(date=as.Date(t_tofill),year = as.numeric(format(t_tofill, format = &quot;%Y&quot;)),
+                month = as.numeric(format(t_tofill, format = &quot;%m&quot;)),
+                day = as.numeric(format(t_tofill, format = &quot;%d&quot;)),
+                hour=rep(0,length(t_tofill)),min=rep(0,length(t_tofill)))
+# combine two dataframe
+data_out&lt;- data.frame(df[,-1],coredata(zy))
+
+#write out the filled time series
+write.table(data_out,&quot;wq_579020_2007_2018.txt&quot;,sep=&quot;\t&quot;,row.names = F,col.names = F,append = T)</code></pre>
+<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the toolbar or by pressing <em>Ctrl+Alt+I</em>.</p>
+<p>When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the <em>Preview</em> button or press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
+<p>The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.3 (2020-02-29)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 18363)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_Europe.1252  LC_CTYPE=English_Europe.1252   
+[3] LC_MONETARY=English_Europe.1252 LC_NUMERIC=C                   
+[5] LC_TIME=English_Europe.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] zoo_1.8-7       lubridate_1.7.4 forcats_0.5.0   stringr_1.4.0  
+ [5] dplyr_0.8.5     purrr_0.3.3     readr_1.3.1     tidyr_1.0.2    
+ [9] tibble_2.1.3    ggplot2_3.3.0   tidyverse_1.3.0 workflowr_1.6.1
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.0.0 xfun_0.12        haven_2.2.0      lattice_0.20-40 
+ [5] colorspace_1.4-1 vctrs_0.2.4      generics_0.0.2   htmltools_0.4.0 
+ [9] yaml_2.2.1       rlang_0.4.5      later_1.0.0      pillar_1.4.3    
+[13] withr_2.1.2      glue_1.3.2       DBI_1.1.0        dbplyr_1.4.2    
+[17] modelr_0.1.6     readxl_1.3.1     lifecycle_0.2.0  munsell_0.5.0   
+[21] gtable_0.3.0     cellranger_1.1.0 rvest_0.3.5      evaluate_0.14   
+[25] knitr_1.28       httpuv_1.5.2     fansi_0.4.1      broom_0.5.5     
+[29] Rcpp_1.0.3       promises_1.1.0   backports_1.1.5  scales_1.1.0    
+[33] jsonlite_1.6.1   fs_1.3.2         hms_0.5.3        digest_0.6.25   
+[37] stringi_1.4.3    grid_3.6.3       rprojroot_1.3-2  cli_2.0.2       
+[41] tools_3.6.3      magrittr_1.5     crayon_1.3.4     whisker_0.4     
+[45] pkgconfig_2.0.3  xml2_1.2.5       reprex_0.3.0     rstudioapi_0.11 
+[49] assertthat_0.2.1 rmarkdown_2.1    httr_1.4.1       R6_2.4.1        
+[53] nlme_3.1-145     git2r_0.26.1     compiler_3.6.3  </code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
