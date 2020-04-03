@@ -1,0 +1,212 @@
+---
+title: "selke"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+ 
+
+```{r  message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+library(xts)
+library(hydroGOF)
+# Silbe
+Q_silb <- read_table2('D:/BODE_data/Alex/579605.txt',skip = 5)
+colnames(Q_silb) <- c('Year','Mon', 'Day','HH','MM','Q')
+
+Q_silb <-
+  unite(Q_silb, 'dates', c('Year', 'Mon', 'Day')) %>% mutate(dates = ymd(dates)) %>% select(-c('HH','MM'))
+Q_silb[Q_silb == -9999] <- NA
+
+
+# create xts time series
+Q_silb_xts <- xts(Q_silb$Q, order.by = Q_silb$dates)
+# to month
+Q_mon_silb_xts <- apply.monthly(Q_silb_xts,mean)
+
+# MEis
+Q_meis <- read_table2('D:/BODE_data/Alex/579610.txt',skip = 5)
+colnames(Q_meis) <- c('Year','Mon', 'Day','HH','MM','Q')
+
+Q_meis<-
+  unite(Q_meis, 'dates', c('Year', 'Mon', 'Day')) %>% mutate(dates = ymd(dates)) %>% select(-c('HH','MM'))
+Q_meis[Q_meis == -9999] <- NA
+# create xts time series
+Q_meis_xts <- xts(Q_meis[1:6940,2], order.by = Q_meis[1:6940,1]$dates )
+#
+Q_mon_meis_xts <- apply.monthly(Q_meis_xts,mean)
+
+
+# Haus
+Q_haus <- read_table2('D:/BODE_data/Alex/579620.txt',skip = 5)
+colnames(Q_haus) <- c('Year','Mon', 'Day','HH','MM','Q')
+
+Q_haus<-
+  unite(Q_haus, 'dates', c('Year', 'Mon', 'Day')) %>% mutate(dates = ymd(dates)) %>% select(-c('HH','MM'))
+Q_haus[Q_haus == -9999] <- NA
+# create xts time series
+Q_haus_xts <- xts(Q_haus[1:6940,2], order.by = Q_haus[1:6940,1]$dates )
+#
+Q_mon_haus_xts <- apply.monthly(Q_haus_xts,mean)
+
+
+# m3/s *24*3600 *1000 /10^6 km2= mm/d
+depth_silb <- coredata(Q_mon_silb_xts) *24*3600*10^3/(105*10^6)
+
+depth_meis <- coredata(Q_mon_meis_xts) *24*3600*10^3/(210*10^6)
+
+depth_haus <- coredata(Q_mon_haus_xts) *24*3600*10^3/(456*10^6)
+
+date <- seq(as.Date('2000-01-01'),as.Date('2018-12-31') ,by='month')
+
+
+depth <- data.frame(date,depth_silb,depth_meis,depth_haus)
+colnames(depth) <- c('date','Q_Silb_mon','Q_Meis_mon','Q_Haus_mon')
+
+depth %>% ggplot(aes(x=date))+
+  geom_line(aes(y=Q_Silb_mon),color='black')+
+  geom_line(aes(y=Q_Meis_mon),color='blue')+
+  geom_line(aes(y=Q_Haus_mon),color='red') +
+  theme_bw()+
+  ylab('Q (mm/d)')
+
+
+depth_haus_meis <- (coredata(Q_mon_haus_xts)-coredata(Q_mon_meis_xts))*24*3600*10^3/(246*10^6)
+
+depth_haus_meis <- data.frame(date,depth_haus_meis)
+depth_haus_meis%>% ggplot(aes(x=date,y=Q))+
+  geom_line( color='black')+
+  geom_smooth(se = FALSE, method = lm )+
+  theme_bw()+
+  ylab('Q (mm/d)')
+
+
+```
+
+```{r boxplot}
+
+# silb
+ Q_silb <- read_table2('D:/BODE_data/Alex/579605.txt',skip = 5)
+colnames(Q_silb) <- c('Year','Mon', 'Day','HH','MM','Q')
+
+# MEis
+Q_meis <- read_table2('D:/BODE_data/Alex/579610.txt',skip = 5)
+colnames(Q_meis) <- c('Year','Mon', 'Day','HH','MM','Q')
+
+# 2000-2018
+Q_meis <- Q_meis %>% filter(Year>=2000 & Year<=2018)
+
+# Haus
+Q_haus <- read_table2('D:/BODE_data/Alex/579620.txt',skip = 5)
+colnames(Q_haus) <- c('Year','Mon', 'Day','HH','MM','Q')
+
+Q_haus <- Q_haus %>% filter(Year>=2000 & Year<=2018)
+
+
+Q <- data.frame(Q_silb,Q_meis$Q,Q_haus$Q) %>% gather('Station','Discharge',c(Q,Q_meis.Q,Q_haus.Q)) 
+
+# 2000-2018
+Q %>% ggplot(aes(
+  x = as.factor(Mon),
+  y = Discharge,
+  fill = factor(Station, levels = c("Q", "Q_meis.Q", "Q_haus.Q"))
+)) +  geom_boxplot(outlier.shape = NA) +
+  ylim(c(0, 7)) + labs(x = "Month", y = "Discharge (m3/s)") +
+  scale_fill_discrete(name = 'Station', labels = c('Silb', 'Meis', 'Haus')) +
+  theme_bw()
+
+# 2001-2008
+Q %>% filter(Year >= 2001 & Year <= 2008) %>%
+  ggplot(aes(
+    x = as.factor(Mon),
+    y = Discharge,
+    fill = factor(Station, levels = c("Q", "Q_meis.Q", "Q_haus.Q"))
+  )) +      geom_boxplot(notch = T,
+                         varwidth = T,
+                         outlier.shape = NA) +
+  ylim(c(0, 7)) + labs(x = "Month", y = "Discharge (m3/s)") +
+  scale_fill_discrete(name = 'Station', labels = c('Silb', 'Meis', 'Haus')) +
+  theme_bw()
+
+# 2011-2018
+Q %>% filter(Year >= 2011 &  Year <= 2018) %>%   
+  ggplot(aes( x = as.factor(Mon),
+              y = Discharge,
+              fill = factor(Station, levels = c("Q", "Q_meis.Q", "Q_haus.Q"))
+               )) +  geom_boxplot(outlier.shape = NA) +
+  ylim(c(0, 7)) + labs(x = "Month", y = "Discharge (m3/s)") +
+  scale_fill_discrete(name = 'Station', labels = c('Silb', 'Meis', 'Haus')) +
+  theme_bw()
+
+
+```
+
+```{r station}
+# silb three period in one plot
+
+# 2000-2018
+q_silb_2000_2018 <- Q %>% filter(Station=='Q') 
+
+# 2001-2008
+q_silb_2001_08 <- Q %>% filter(Year>=2001 & Year<=2008 & Station=='Q' ) %>% mutate(Station='Q1')
+
+q_silb_2011_18 <- Q %>% filter(Year>=2011 & Year<=2018 & Station=='Q' ) %>% 
+  mutate(Station='Q2')
+
+q_silb <- q_silb_2000_2018 %>% full_join(q_silb_2001_08) %>% full_join(q_silb_2011_18) 
+
+q_silb %>% ggplot( aes(x=as.factor(Mon), y=Discharge,fill=Station) ) +  geom_boxplot(outlier.shape = NA) +
+    ylim(c(0,7))+labs(x = "Month", y = "Discharge (m3/s)")+
+  theme_bw()+
+  scale_fill_discrete(name='Period',labels=c('2000-2018','2001-2008','2011-2018'))+
+  ggtitle('Silbhuette')
+
+# meis three period in one plot
+# 2000-2018
+q_meis_2000_2018 <- Q %>% filter(Station=='Q_meis.Q') 
+
+# 2001-2008
+q_meis_2001_08 <- Q %>% filter(Year>=2001 & Year<=2008 & Station=='Q_meis.Q' ) %>% mutate(Station='Q1')
+
+q_meis_2011_18 <- Q %>% filter(Year>=2011 & Year<=2018 & Station=='Q_meis.Q' ) %>% 
+  mutate(Station='Q2')
+
+q_meis <- q_meis_2000_2018 %>% full_join(q_meis_2001_08) %>% full_join(q_meis_2011_18) 
+
+
+q_meis%>% 
+  ggplot( aes(x=as.factor(Mon), y=Discharge,fill=Station) ) +      geom_boxplot(outlier.shape = NA) +
+    ylim(c(0,7))+labs(x = "Month", y = "Discharge (m3/s)")+
+  theme_bw()+
+  scale_fill_discrete(name='Period',labels=c('2000-2018','2001-2008','2011-2018'))+
+  ggtitle('Meisdorf')
+
+
+# Haus
+# 2000-2018
+q_haus_2000_2018 <- Q %>% filter(Station=='Q_haus.Q') 
+
+# 2001-2008
+q_haus_2001_08 <- Q %>% filter(Year>=2001 & Year<=2008 & Station=='Q_haus.Q' ) %>% mutate(Station='Q1')
+
+q_haus_2011_18 <- Q %>% filter(Year>=2011 & Year<=2018 & Station=='Q_haus.Q' ) %>% 
+  mutate(Station='Q2')
+
+q_haus <- q_haus_2000_2018 %>% full_join(q_haus_2001_08) %>% full_join(q_haus_2011_18) 
+
+
+q_haus%>% 
+  ggplot( aes(x=as.factor(Mon), y=Discharge,fill=Station) ) +      geom_boxplot(outlier.shape = NA) +
+    ylim(c(0,7))+labs(x = "Month", y = "Discharge (m3/s)")+
+  theme_bw()+
+  scale_fill_discrete(name='Period',labels=c('2000-2018','2001-2008','2011-2018'))+
+  ggtitle('Hausneidorf')
+
+
+
+```
+
